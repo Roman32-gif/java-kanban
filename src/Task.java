@@ -1,3 +1,5 @@
+import java.util.Objects;
+
 public class Task {
 
     private int id;
@@ -36,6 +38,13 @@ public class Task {
         this.status = status;
     }
 
+    public Task copy () {
+        Task copy = new Task (this.name, this.description) ;
+        copy.setId(this.id);
+        copy.setStatus(this.status);
+        return copy;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -43,5 +52,18 @@ public class Task {
                 ", description='" + description + '\'' +
                 ", status=" + status +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return  true;
+        if (!(object instanceof Task)) return false;
+        Task task = (Task) object;
+        return id == task.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
     }
 }

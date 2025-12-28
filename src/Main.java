@@ -1,6 +1,6 @@
 public class Main {
     public static void main(String[] args) {
-        Manager manager = new Manager();
+        TaskManager manager = Managers.getDefault();
 
         Task task1 = new Task("Сделать уроки", "Написать сочинение");
         int taskId1 = manager.createNewTask(task1);

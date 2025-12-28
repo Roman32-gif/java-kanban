@@ -2,11 +2,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Manager {
+public class InMemoryTaskManager implements TaskManager {
     private  final HashMap<Integer, Task> baseTasks = new HashMap<>();
     private  final HashMap<Integer,Epic> epicTasks = new HashMap<>();
     private  final HashMap<Integer, Subtask> subTasks = new HashMap<>();
     private  int idCounter = 1;
+    private final HistoryManager history = Managers.getDefaultHistory();
 
 
     private  int generateId() {
@@ -35,6 +36,10 @@ public class Manager {
             return -1;
         }
 
+        if (subtask.getId() == subtask.getEpicId()) {
+            return -1;
+        }
+
         int id = generateId();
         subtask.setId(id);
         subTasks.put(id, subtask);
@@ -43,6 +48,7 @@ public class Manager {
         return id;
     }
 
+    @Override
     public List<Task> getAllTasks () {
         List<Task> allTasks = new ArrayList<>();
         allTasks.addAll(baseTasks.values());
@@ -57,6 +63,7 @@ public class Manager {
         subTasks.clear();
     }
 
+    @Override
     public Task getTaskById (int id) {
 
         if (baseTasks.containsKey(id)) {
@@ -69,19 +76,23 @@ public class Manager {
         return null;
     }
 
+    @Override
     public int createNewTask (Task task) {
         return addBaseTasks(task);
 
     }
 
+    @Override
     public  int createNewEpic (Epic epic) {
         return addEpicTasks(epic);
     }
 
+    @Override
     public  int createNewSubTask (Subtask subtask) {
         return addSubTask(subtask);
     }
 
+    @Override
     public  void updateBaseTask (Task updatedTask) {
         int id = updatedTask.getId();
         if (baseTasks.containsKey(id)) {
@@ -89,6 +100,7 @@ public class Manager {
         }
     }
 
+    @Override
     public  void updateEpic (Epic updatedEpic) {
         int id = updatedEpic.getId();
         if (epicTasks.containsKey(id)) {
@@ -98,6 +110,7 @@ public class Manager {
         }
     }
 
+    @Override
     public  void updateSubTask (Subtask updatedSubtask) {
         int id = updatedSubtask.getId();
         Subtask oldSubTask = subTasks.get(id);
@@ -126,12 +139,14 @@ public class Manager {
         }
     }
 
+    @Override
     public  void deleteBasicTask (int id) {
         if (baseTasks.containsKey(id)) {
             baseTasks.remove(id);
         }
     }
 
+    @Override
     public  void deleteEpic (int id) {
         Epic epic = epicTasks.get(id);
 
@@ -146,6 +161,7 @@ public class Manager {
         epicTasks.remove(id);
     }
 
+    @Override
     public  void deleteSubTask(int id) {
         Subtask subtask = subTasks.remove(id);
         if (subtask == null) {
@@ -218,6 +234,37 @@ public class Manager {
         } else {
             epic.setStatus(Status.IN_PROGRESS);
         }
+    }
+
+
+    public Task getTask (int id) {
+        Task task = baseTasks.get(id);
+        if (task != null) {
+           history.add(task.copy());
+        }
+        return task;
+    }
+
+    @Override
+    public Epic getEpic(int id) {
+        Epic epic = epicTasks.get(id);
+        if (epic != null) {
+            history.add(epic.copy());
+        }
+        return epic;
+    }
+
+    @Override
+    public Subtask getSubTask (int id) {
+        Subtask subtask = subTasks.get(id);
+        if (subtask != null) {
+           history.add(subtask.copy());
+        }
+        return subtask;
+    }
+
+    public List<Task> getHistory () {
+        return history.getHistory();
     }
 
 }

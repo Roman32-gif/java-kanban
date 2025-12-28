@@ -20,4 +20,12 @@ public class Subtask extends Task{
                 ", epicId=" + epicId +
                 '}';
     }
+
+    @Override
+    public Subtask copy () {
+        Subtask copy = new Subtask(this.getName(), this.getDescription(), this.getEpicId());
+        copy.setId(this.getId());
+        copy.setStatus(this.getStatus());
+        return copy;
+    }
 }
