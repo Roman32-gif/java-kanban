@@ -14,7 +14,7 @@ public interface TaskManager {
 
     void updateSubTask(Subtask updatedSubtask);
 
-    void deleteBasicTask (int id);
+    void deleteBasicTask(int id);
 
     void deleteEpic(int id);
 
@@ -22,7 +22,7 @@ public interface TaskManager {
 
     List<Task> getAllTasks();
 
-    Task getTaskById (int id);
+    Task getTaskById(int id);
 
     Task getTask(int id);
 
