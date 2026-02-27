@@ -1,11 +1,10 @@
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class TaskTest {
 
     @Test
-    void equalsIdTask () {
+    void equalsIdTask() {
         Task task1 = new Task("Сделать уроки", "Написать сочинение");
         task1.setId(2);
         Task task2 = new Task("Сделать уроки", "Написать сочинение");
@@ -14,7 +13,7 @@ class TaskTest {
     }
 
     @Test
-    void equalsIdEpicAndSubTask () {
+    void equalsIdEpicAndSubTask() {
         Epic epicTask1 = new Epic("Подготовка к новому году", "Украсить дом");
         epicTask1.setId(1);
         Subtask subTask1 = new Subtask("Купить ёлку", "Высота ёлки 1,5 метра, цвет белый", 1);
@@ -24,7 +23,7 @@ class TaskTest {
 
 
     @Test
-    void checkConflictsBetweenId () {
+    void checkConflictsBetweenId() {
         TaskManager manager = Managers.getDefault();
         Task task1 = new Task("Сделать уроки", "Написать сочинение");
         task1.setId(4);
@@ -38,7 +37,7 @@ class TaskTest {
     }
 
     @Test
-    void invariabilityOfTask () {
+    void invariabilityOfTask() {
         TaskManager manager = Managers.getDefault();
         Task task1 = new Task("Сделать уроки", "Написать сочинение");
         Task copyTask = new Task("Сделать уроки", "Написать сочинение");

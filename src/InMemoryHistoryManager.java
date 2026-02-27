@@ -3,13 +3,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class InMemoryHistoryManager implements HistoryManager{
+public class InMemoryHistoryManager implements HistoryManager {
     private final Map<Integer, Node> history = new HashMap<>();
     private Node tail;
     private Node head;
 
     @Override
-    public void add (Task task) {
+    public void add(Task task) {
         Node copyTask = history.get(task.getId());
         if (copyTask != null) {
             removeNode(copyTask);
@@ -18,18 +18,19 @@ public class InMemoryHistoryManager implements HistoryManager{
     }
 
     @Override
-    public List<Task> getHistory () {
+    public List<Task> getHistory() {
         return getTasks();
     }
 
     @Override
-    public void remove (int id) {
+    public void remove(int id) {
         Node node = history.remove(id);
         if (node != null) {
             removeNode(node);
         }
     }
-    private void linkLast (Task task) {
+
+    private void linkLast(Task task) {
         Node node = new Node(task);
         if (head == null) {
             head = node;
@@ -42,11 +43,11 @@ public class InMemoryHistoryManager implements HistoryManager{
         history.put(task.getId(), node);
     }
 
-    private void removeNode (Node node) {
+    private void removeNode(Node node) {
         Node prev = node.getPrev();
         Node next = node.getNext();
 
-        if (prev == null){ //если предыдущий узел 0, то голова это следующий узел
+        if (prev == null) { //если предыдущий узел 0, то голова это следующий узел
             head = next;
         } else { // предыдущий узел теперь следующий узел
             prev.setNext(next);
@@ -59,7 +60,7 @@ public class InMemoryHistoryManager implements HistoryManager{
         }
     }
 
-    private List<Task> getTasks () {
+    private List<Task> getTasks() {
         List<Task> watchedTasks = new ArrayList<>();
         Node current = head;
         while (current != null) {

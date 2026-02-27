@@ -1,5 +1,3 @@
-import java.util.Objects;
-
 public class Task {
 
     private int id;
@@ -21,7 +19,6 @@ public class Task {
         return description;
     }
 
-
     public Status getStatus() {
         return status;
     }
@@ -30,16 +27,16 @@ public class Task {
         return id;
     }
 
-    public void setId (int id) {
+    public void setId(int id) {
         this.id = id;
     }
 
-    public void setStatus (Status status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
-    public Task copy () {
-        Task copy = new Task (this.name, this.description) ;
+    public Task copy() {
+        Task copy = new Task(this.name, this.description);
         copy.setId(this.id);
         copy.setStatus(this.status);
         return copy;
@@ -53,10 +50,9 @@ public class Task {
                 ", status=" + status +
                 '}';
     }
-
     @Override
     public boolean equals(Object object) {
-        if (this == object) return  true;
+        if (this == object) return true;
         if (!(object instanceof Task)) return false;
         Task task = (Task) object;
         return id == task.id;

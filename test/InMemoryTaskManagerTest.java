@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class InMemoryTaskManagerTest {
     @Test
-    void addDifferentTasksInInMemoryTaskManager () {
+    void addDifferentTasksInInMemoryTaskManager() {
         TaskManager manager = Managers.getDefault();
         Task task1 = new Task("Сделать уроки", "Написать сочинение");
         int taskId1 = manager.createNewTask(task1);
