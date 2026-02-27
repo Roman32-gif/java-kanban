@@ -1,6 +1,7 @@
 public class Main {
     public static void main(String[] args) {
         TaskManager manager = Managers.getDefault();
+        HistoryManager history = Managers.getDefaultHistory();
 
         Task task1 = new Task("Сделать уроки", "Написать сочинение");
         int taskId1 = manager.createNewTask(task1);
@@ -31,13 +32,17 @@ public class Main {
         subTask3.setStatus(Status.DONE);
         manager.updateSubTask(subTask3);
 
+        history.add(task1);
+        history.add(task2);
+        history.add(task1);
+
 
         System.out.println("Задачи после изменений статусов");
         System.out.println(manager.getAllTasks());
-
         manager.deleteBasicTask(1);
         manager.deleteEpic(2);
         System.out.println("Все задачи после удалений");
         System.out.println(manager.getAllTasks());
+        System.out.println(history.getHistory());
     }
 }
