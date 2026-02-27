@@ -7,7 +7,6 @@ public class InMemoryTaskManager implements TaskManager {
     private int idCounter = 1;
     private final HistoryManager history = Managers.getDefaultHistory();
 
-
     private int generateId() {
         return idCounter++;
     }
@@ -166,7 +165,6 @@ public class InMemoryTaskManager implements TaskManager {
 
         int epicId = subtask.getEpicId();
         Epic epic = epicTasks.get(epicId);
-
 
         if (epic != null) {
             epic.getSubtaskIds().remove((Integer) id);
