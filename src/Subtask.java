@@ -1,4 +1,4 @@
-public class Subtask extends Task{
+public class Subtask extends Task {
     private final int epicId;
 
     public Subtask(String name, String description, int epicId) {
@@ -8,7 +8,7 @@ public class Subtask extends Task{
     }
 
     public int getEpicId() {
-        return  epicId;
+        return epicId;
     }
 
     @Override
@@ -22,7 +22,7 @@ public class Subtask extends Task{
     }
 
     @Override
-    public Subtask copy () {
+    public Subtask copy() {
         Subtask copy = new Subtask(this.getName(), this.getDescription(), this.getEpicId());
         copy.setId(this.getId());
         copy.setStatus(this.getStatus());
