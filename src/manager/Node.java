@@ -1,3 +1,6 @@
+package manager;
+import models.Task;
+
 public class Node {
     private Task task;
     private Node next;
