@@ -16,7 +16,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             writer.write('\ufeff');
             writer.write("id,type,name,status,description,epic\n");
 
-            for (Task task : super.baseTasks.values()){
+            for (Task task : super.baseTasks.values()) {
                 writer.write(toString(task) + "\n");
             }
 
@@ -81,7 +81,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
             fileBackedTaskManager.idCounter = maxId;
 
-        } catch (IOException o){
+        } catch (IOException o) {
             throw new ManagerSaveException("Ошибка при считывании файла " + file);
         }
         return fileBackedTaskManager;

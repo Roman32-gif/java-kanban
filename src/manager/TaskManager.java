@@ -2,17 +2,15 @@ package manager;
 import models.Epic;
 import models.Subtask;
 import models.Task;
-
-import java.io.IOException;
 import java.util.List;
 
 public interface TaskManager {
 
-    int createNewTask(Task task) throws IOException;
+    int createNewTask(Task task);
 
-    int createNewEpic(Epic epic) throws IOException;
+    int createNewEpic(Epic epic);
 
-    int createNewSubTask(Subtask subtask) throws IOException;
+    int createNewSubTask(Subtask subtask);
 
     void updateBaseTask(Task updatedTask);
 
