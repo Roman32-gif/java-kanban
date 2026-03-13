@@ -6,10 +6,10 @@ import models.Task;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
-    private final Map<Integer, Task> baseTasks = new HashMap<>();
-    private final Map<Integer, Epic> epicTasks = new HashMap<>();
-    private final Map<Integer, Subtask> subTasks = new HashMap<>();
-    private int idCounter = 1;
+    protected final Map<Integer, Task> baseTasks = new HashMap<>();
+    protected final Map<Integer, Epic> epicTasks = new HashMap<>();
+    protected final Map<Integer, Subtask> subTasks = new HashMap<>();
+    protected int idCounter = 1;
     private final HistoryManager history = Managers.getDefaultHistory();
 
     private int generateId() {
