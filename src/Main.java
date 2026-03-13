@@ -7,9 +7,8 @@ import java.io.File;
 
 public class Main {
     public static void main(String[] args) {
-        String file ="D://test/TestFile.CSV";
+        String file = "D://test/TestFile.CSV";
         FileBackedTaskManager manager = FileBackedTaskManager.loadFromFile(new File(file));
-
 
         Task task1 = new Task("Сделать уроки", "Написать сочинение");
         int taskId1 = manager.createNewTask(task1);
