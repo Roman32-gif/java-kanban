@@ -79,7 +79,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
             }
 
-            fileBackedTaskManager.idCounter = maxId;
+            for (Subtask subtask : fileBackedTaskManager.subTasks.values()) {
+                int epicId = subtask.getEpicId();
+                Epic epic = fileBackedTaskManager.epicTasks.get(epicId);
+                if (epic != null) {
+                    epic.addSubtask(subtask.getId());
+                }
+            }
+
+            for (Epic epic : fileBackedTaskManager.epicTasks.values()) {
+                fileBackedTaskManager.calculateEpicStatus(epic.getId());
+            }
+
+            fileBackedTaskManager.idCounter = maxId + 1;
 
         } catch (IOException o) {
             throw new ManagerSaveException("Ошибка при считывании файла " + file);
@@ -120,8 +132,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 return newSubtask;
 
             default:
-                throw new IllegalArgumentException("Неизвестный тип " + type);
+                throw new ManagerSaveException("Неизвестный тип " + type);
         }
+    }
+
+    private void calculateEpicStatus(int epicId) {
+        super.updateEpicStatus(epicId);
     }
 
     @Override
