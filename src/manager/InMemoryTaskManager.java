@@ -1,3 +1,8 @@
+package manager;
+import models.Epic;
+import models.Status;
+import models.Subtask;
+import models.Task;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -55,6 +60,15 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public void deleteAllTasks() {
+        List<Integer> allId = new ArrayList<>();
+        allId.addAll(baseTasks.keySet());
+        allId.addAll(epicTasks.keySet());
+        allId.addAll(subTasks.keySet());
+
+        for (int id : allId) {
+            history.remove(id);
+        }
+
         baseTasks.clear();
         epicTasks.clear();
         subTasks.clear();
@@ -138,6 +152,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteBasicTask(int id) {
         if (baseTasks.containsKey(id)) {
             baseTasks.remove(id);
+            history.remove(id);
         }
     }
 
@@ -151,9 +166,11 @@ public class InMemoryTaskManager implements TaskManager {
 
         for (Integer subtaskId : epic.getSubtaskIds()) {
             subTasks.remove(subtaskId);
+            history.remove(subtaskId);
         }
 
         epicTasks.remove(id);
+        history.remove(id);
     }
 
     @Override
@@ -163,6 +180,7 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
 
+        history.remove(id);
         int epicId = subtask.getEpicId();
         Epic epic = epicTasks.get(epicId);
 

@@ -1,3 +1,11 @@
+import manager.HistoryManager;
+import manager.Managers;
+import manager.TaskManager;
+import models.Epic;
+import models.Status;
+import models.Subtask;
+import models.Task;
+
 public class Main {
     public static void main(String[] args) {
         TaskManager manager = Managers.getDefault();
