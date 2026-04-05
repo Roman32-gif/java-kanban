@@ -313,9 +313,9 @@ public class InMemoryTaskManager implements TaskManager {
 
 
     private void updateInfoAboutTime(Epic epic) {
-        List <Integer> subTaskIds = epic.getSubtaskIds();
+        List<Integer> subTaskIds = epic.getSubtaskIds();
 
-        if(subTaskIds.isEmpty()) {
+        if (subTaskIds.isEmpty()) {
             epic.setDuration(Duration.ZERO);
             epic.setEndTime(null);
             epic.setStartTime(null);
@@ -337,7 +337,7 @@ public class InMemoryTaskManager implements TaskManager {
                 startTime = subtask.getStartTime();
             }
 
-            if(endTime == null || subtask.getEndTime().isAfter(endTime)) {
+            if (endTime == null || subtask.getEndTime().isAfter(endTime)) {
                 endTime = subtask.getEndTime();
             }
         }
