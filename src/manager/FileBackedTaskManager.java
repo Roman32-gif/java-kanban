@@ -2,6 +2,10 @@ package manager;
 import models.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.stream.Stream;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
@@ -14,19 +18,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
             writer.write('\ufeff');
-            writer.write("id,type,name,status,description,epic\n");
+            writer.write("id,type,name,status,description,epic,duration,startTime\n");
 
-            for (Task task : super.baseTasks.values()) {
-                writer.write(toString(task) + "\n");
-            }
-
-            for (Epic epic : super.epicTasks.values()) {
-                writer.write(toString(epic) + "\n");
-            }
-
-            for (Subtask subtask : super.subTasks.values()) {
-                writer.write(toString(subtask) + "\n");
-            }
+            Stream.of(baseTasks.values(), epicTasks.values(), subTasks.values())
+                    .flatMap(Collection::stream)
+                    .map(this::toString)
+                    .forEach(line -> {
+                        try {
+                            writer.write(line + "\n");
+                        } catch (IOException e) {
+                            throw new ManagerSaveException("Ошибка при записи " + line);
+                        }
+                    });
 
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка при записи в файл " + file);
@@ -52,7 +55,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             type = Types.TASK;
         }
 
-        return task.getId() + "," + type + "," + task.getName() + "," + task.getStatus() + "," + task.getDescription() + "," + epicId;
+        return task.getId() + "," + type + "," + task.getName() + "," + task.getStatus() + "," + task.getDescription() + "," + epicId + "," + task.getDuration() + "," + task.getStartTime();
     }
 
     public static FileBackedTaskManager loadFromFile(File file) {
@@ -79,17 +82,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
             }
 
-            for (Subtask subtask : fileBackedTaskManager.subTasks.values()) {
-                int epicId = subtask.getEpicId();
-                Epic epic = fileBackedTaskManager.epicTasks.get(epicId);
-                if (epic != null) {
-                    epic.addSubtask(subtask.getId());
-                }
-            }
+            fileBackedTaskManager.subTasks.values().stream()
+                    .forEach(subtask -> {
+                        Epic epic = fileBackedTaskManager.epicTasks.get(subtask.getEpicId());
+                        if (epic != null) {
+                            epic.addSubtask(subtask.getId());
+                        }
+                    });
 
-            for (Epic epic : fileBackedTaskManager.epicTasks.values()) {
-                fileBackedTaskManager.calculateEpicStatus(epic.getId());
-            }
+            fileBackedTaskManager.epicTasks.values().stream()
+                    .map(Epic::getId)
+                    .forEach(fileBackedTaskManager::calculateEpicStatus);
 
             fileBackedTaskManager.idCounter = maxId + 1;
 
@@ -106,6 +109,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = parseString[2];
         Status status = Status.valueOf(parseString[3]);
         String description = parseString[4];
+        Duration duration = parseString[6].equals("null") ? Duration.ZERO : Duration.parse(parseString[6]);
+        LocalDateTime startTime = parseString[7].equals("null") ? null : LocalDateTime.parse(parseString[7]);
         int epicId = 0;
 
         if (type.equals(Types.SUBTASK)) {
@@ -114,7 +119,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         switch (type) {
             case TASK:
-                Task newTask = new Task(name,description);
+                Task newTask = new Task(name,description, duration, startTime);
                 newTask.setId(id);
                 newTask.setStatus(status);
                 return newTask;
@@ -126,7 +131,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 return newEpic;
 
             case SUBTASK:
-                Subtask newSubtask = new Subtask(name, description, epicId);
+                Subtask newSubtask = new Subtask(name, description, epicId, duration, startTime);
                 newSubtask.setId(id);
                 newSubtask.setStatus(status);
                 return newSubtask;

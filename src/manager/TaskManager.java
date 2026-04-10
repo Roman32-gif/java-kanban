@@ -24,6 +24,10 @@ public interface TaskManager {
 
     void deleteSubTask(int id);
 
+    void deleteAllTasks();
+
+    List<Subtask> showAllSubTasksByEpic(int id);
+
     List<Task> getAllTasks();
 
     Task getTaskById(int id);
@@ -33,6 +37,12 @@ public interface TaskManager {
     Epic getEpic(int id);
 
     Subtask getSubTask(int id);
+
+    List<Task> getHistory();
+
+    List<Task> getPrioritizedTasks();
+
+    boolean checkIntersections(Task task);
 
 
 }

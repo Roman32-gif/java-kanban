@@ -3,17 +3,19 @@ import models.Epic;
 import models.Subtask;
 import models.Task;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.io.File;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FileBackedTaskManagerTest {
+public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     private File tempfile;
 
-    @BeforeEach
-    void setUp() {
+    @Override
+    protected FileBackedTaskManager createManager() {
         tempfile = new File("test.csv");
+        return new FileBackedTaskManager(tempfile);
     }
 
     @AfterEach
@@ -28,7 +30,7 @@ public class FileBackedTaskManagerTest {
         File file = new File("L:/test/TestFile12.CSV");
         FileBackedTaskManager manager = new FileBackedTaskManager(file);
         FileBackedTaskManager.ManagerSaveException e = assertThrows(FileBackedTaskManager.ManagerSaveException.class, () ->{
-                manager.createNewTask(new Task("Сделать уроки", "Написать сочинение"));});
+                manager.createNewTask(new Task("Сделать уроки", "Написать сочинение", Duration.ofMinutes(40), LocalDateTime.now()));});
         String expectedException = "Ошибка при записи в файл " + file;
         assertEquals(expectedException, e.getMessage(), "Другой текст исключения");
         }
@@ -46,9 +48,9 @@ public class FileBackedTaskManagerTest {
     @Test
     public void correctSaveToFileAndLoadFromFile() {
         FileBackedTaskManager manager = new FileBackedTaskManager(tempfile);
-        Task task1 = new Task("Сделать уроки", "Написать сочинение");
+        Task task1 = new Task("Сделать уроки", "Написать сочинение", Duration.ofMinutes(30), LocalDateTime.now());
         int taskId1 = manager.createNewTask(task1);
-        Task task2 = new Task("Сделать ремонт", "Поклеить обои");
+        Task task2 = new Task("Сделать ремонт", "Поклеить обои", Duration.ofMinutes(50), LocalDateTime.now().plusHours(1));
         int taskId2 = manager.createNewTask(task2);
         manager.save();
         FileBackedTaskManager loaderManager = FileBackedTaskManager.loadFromFile(tempfile);
@@ -62,7 +64,7 @@ public class FileBackedTaskManagerTest {
         Epic epic = new Epic("Подготовка к новому году", "Украсить дом");
         manager.createNewEpic(epic);
         int epicId = epic.getId();
-        Subtask subtask = new Subtask("Купить ёлку", "Высота ёлки 1 метр", epicId);
+        Subtask subtask = new Subtask("Купить ёлку", "Высота ёлки 1 метр", epicId, Duration.ofMinutes(20), LocalDateTime.now());
         manager.createNewSubTask(subtask);
         FileBackedTaskManager loadManager = FileBackedTaskManager.loadFromFile(tempfile);
         Epic epic1 = loadManager.getEpic(epicId);
