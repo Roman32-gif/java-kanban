@@ -4,6 +4,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.stream.Stream;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
@@ -18,17 +20,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             writer.write('\ufeff');
             writer.write("id,type,name,status,description,epic,duration,startTime\n");
 
-            for (Task task : super.baseTasks.values()) {
-                writer.write(toString(task) + "\n");
-            }
-
-            for (Epic epic : super.epicTasks.values()) {
-                writer.write(toString(epic) + "\n");
-            }
-
-            for (Subtask subtask : super.subTasks.values()) {
-                writer.write(toString(subtask) + "\n");
-            }
+            Stream.of(baseTasks.values(), epicTasks.values(), subTasks.values())
+                    .flatMap(Collection::stream)
+                    .map(this::toString)
+                    .forEach(line -> {
+                        try {
+                            writer.write(line + "\n");
+                        } catch (IOException e) {
+                            throw new ManagerSaveException("Ошибка при записи " + line);
+                        }
+                    });
 
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка при записи в файл " + file);
@@ -81,17 +82,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
             }
 
-            for (Subtask subtask : fileBackedTaskManager.subTasks.values()) {
-                int epicId = subtask.getEpicId();
-                Epic epic = fileBackedTaskManager.epicTasks.get(epicId);
-                if (epic != null) {
-                    epic.addSubtask(subtask.getId());
-                }
-            }
+            fileBackedTaskManager.subTasks.values().stream()
+                    .forEach(subtask -> {
+                        Epic epic = fileBackedTaskManager.epicTasks.get(subtask.getEpicId());
+                        if (epic != null) {
+                            epic.addSubtask(subtask.getId());
+                        }
+                    });
 
-            for (Epic epic : fileBackedTaskManager.epicTasks.values()) {
-                fileBackedTaskManager.calculateEpicStatus(epic.getId());
-            }
+            fileBackedTaskManager.epicTasks.values().stream()
+                    .map(Epic::getId)
+                    .forEach(fileBackedTaskManager::calculateEpicStatus);
 
             fileBackedTaskManager.idCounter = maxId + 1;
 

@@ -71,9 +71,7 @@ public class InMemoryTaskManager implements TaskManager {
         allId.addAll(epicTasks.keySet());
         allId.addAll(subTasks.keySet());
 
-        for (int id : allId) {
-            history.remove(id);
-        }
+        allId.forEach(history::remove);
 
         baseTasks.clear();
         epicTasks.clear();
@@ -98,7 +96,7 @@ public class InMemoryTaskManager implements TaskManager {
     public int createNewTask(Task task) {
 
         if (checkIntersections(task)) {
-            throw new RuntimeException("Задачи пересекаются по времени: " + task.getStartTime());
+            throw new FileBackedTaskManager.ManagerSaveException("Задачи пересекаются по времени: " + task.getStartTime());
         }
 
         int base = addBaseTasks(task);
@@ -118,7 +116,7 @@ public class InMemoryTaskManager implements TaskManager {
     public int createNewSubTask(Subtask subtask) {
 
         if (checkIntersections(subtask)) {
-            throw new RuntimeException("Задачи пересекаются по времени: " + subtask.getStartTime());
+            throw new FileBackedTaskManager.ManagerSaveException("Задачи пересекаются по времени: " + subtask.getStartTime());
         }
 
         int sub = addSubTask(subtask);
@@ -130,6 +128,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateBaseTask(Task updatedTask) {
+
+        if (checkIntersections(updatedTask)) {
+            throw new FileBackedTaskManager.ManagerSaveException("Задачи пересекаются по времени: " + updatedTask.getStartTime());
+        }
+
         int id = updatedTask.getId();
         if (baseTasks.containsKey(id)) {
             Task priviousTask = baseTasks.get(id);
@@ -152,6 +155,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateSubTask(Subtask updatedSubtask) {
+
+        if (checkIntersections(updatedSubtask)) {
+            throw new FileBackedTaskManager.ManagerSaveException("Задачи пересекаются по времени: " + updatedSubtask.getStartTime());
+        }
+
         int id = updatedSubtask.getId();
         Subtask oldSubTask = subTasks.get(id);
         if (oldSubTask == null) {
@@ -209,10 +217,12 @@ public class InMemoryTaskManager implements TaskManager {
         for (Integer subtaskId : epic.getSubtaskIds()) {
             subTasks.remove(subtaskId);
             history.remove(subtaskId);
+            sortedTasks.remove(subtaskId);
         }
 
         epicTasks.remove(id);
         history.remove(id);
+        sortedTasks.remove(id);
     }
 
     @Override
@@ -354,6 +364,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public boolean checkIntersections(Task task) {
+
+        if (task.getStartTime() == null || task.getEndTime() == null) {
+            return false;
+        }
+
         return sortedTasks.stream()
                 .filter(taskFromTree -> task.getId() != taskFromTree.getId())
                 .anyMatch(taskFromTree -> {

@@ -3,19 +3,19 @@ import models.Epic;
 import models.Subtask;
 import models.Task;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FileBackedTaskManagerTest {
+public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     private File tempfile;
 
-    @BeforeEach
-    void setUp() {
+    @Override
+    protected FileBackedTaskManager createManager() {
         tempfile = new File("test.csv");
+        return new FileBackedTaskManager(tempfile);
     }
 
     @AfterEach
