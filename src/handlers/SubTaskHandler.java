@@ -70,6 +70,7 @@ public class SubTaskHandler extends BaseHttpHandler {
 
                 case EndPoint.UPDATE_SUBTASK:
                     Subtask subtaskUpdate = gson.fromJson(body, Subtask.class);
+
                     try {
                         manager.updateSubTask(subtaskUpdate);
                         sendText(exchange, "updated", 201);

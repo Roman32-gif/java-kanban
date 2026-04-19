@@ -43,7 +43,7 @@ public class TaskHandler extends BaseHttpHandler {
 
                 case EndPoint.CREATE_TASK:
                     Task taskCreate = gson.fromJson(body, Task.class);
-                    try{
+                    try {
                         manager.createNewTask(taskCreate);
                         sendText(exchange, "created", 201);
                     } catch (BaseHttpHandler.OverLapException o) {
@@ -80,7 +80,7 @@ public class TaskHandler extends BaseHttpHandler {
 
                 default:
                     sendNotFound(exchange);
-                    }
+            }
         } catch (Exception e) {
             sendText(exchange, e.getMessage(), 500);
         }
