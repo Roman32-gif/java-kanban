@@ -30,6 +30,12 @@ public interface TaskManager {
 
     List<Task> getAllTasks();
 
+    List<Task> getAllBaseTasks();
+
+    List<Subtask> getAllSubTasks();
+
+    List<Epic> getAllEpics();
+
     Task getTaskById(int id);
 
     Task getTask(int id);
@@ -43,6 +49,5 @@ public interface TaskManager {
     List<Task> getPrioritizedTasks();
 
     boolean checkIntersections(Task task);
-
 
 }
