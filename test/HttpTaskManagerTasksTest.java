@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class HttpTaskManagerTasksTest {
-
     TaskManager manager;
     HttpTaskServer taskServer;
     Gson gson;
@@ -144,14 +143,14 @@ public class HttpTaskManagerTasksTest {
                 .GET()
                 .build();
 
-        HttpResponse response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         HttpRequest request1 = HttpRequest.newBuilder()
                 .uri(urlHistory)
                 .GET()
                 .build();
 
-        HttpResponse response1 = httpClient.send(request1, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response1 = httpClient.send(request1, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, response.statusCode());
         List<Task> history = manager.getHistory();
         assertEquals(1, history.size());

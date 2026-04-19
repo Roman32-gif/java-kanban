@@ -20,7 +20,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HttpSubTasksTest {
-
     TaskManager manager;
     HttpTaskServer taskServer;
     Gson gson;
@@ -160,7 +159,7 @@ public class HttpSubTasksTest {
                 .GET()
                 .build();
 
-        HttpResponse response = client.send(request1, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = client.send(request1, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, response.statusCode());
         List<Task> taskList = manager.getHistory();
         assertEquals(1, taskList.size());

@@ -31,7 +31,7 @@ public class SubTaskHandler extends BaseHttpHandler {
         InputStream is = exchange.getRequestBody();
         String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
-        try{
+        try {
 
             switch (endPoint) {
 
