@@ -88,14 +88,12 @@ public class EpicHandler extends BaseHttpHandler {
         String[] paths = requestPath.split("/");
 
         if (paths.length == 2 && paths[1].equals("epics")) {
-            if (requestedMethod.equals("GET"))  return EndPoint.GET_EPICS;
-            if (requestedMethod.equals("POST"))  return EndPoint.CREATE_EPIC;
-            }
-        else if (paths.length == 4 && paths[1].equals("epics") && paths[2].equals("id")) {
-            if (requestedMethod.equals("GET"))  return EndPoint.GET_EPIC_BY_ID;
-            if (requestedMethod.equals("DELETE"))  return EndPoint.DELETE_EPIC;
-            }
-         else if (paths.length == 6 && paths[1].equals("epics") && paths[2].equals("id") && paths[5].equals("subtasks")) {
+            if (requestedMethod.equals("GET")) return EndPoint.GET_EPICS;
+            if (requestedMethod.equals("POST")) return EndPoint.CREATE_EPIC;
+        } else if (paths.length == 4 && paths[1].equals("epics") && paths[2].equals("id")) {
+            if (requestedMethod.equals("GET")) return EndPoint.GET_EPIC_BY_ID;
+            if (requestedMethod.equals("DELETE")) return EndPoint.DELETE_EPIC;
+        } else if (paths.length == 6 && paths[1].equals("epics") && paths[2].equals("id") && paths[5].equals("subtasks")) {
             return EndPoint.GET_EPIC_SUBTASKS;
         }
         return EndPoint.UNKNOWN;

@@ -90,16 +90,13 @@ public class TaskHandler extends BaseHttpHandler {
         String[] paths = requestPath.split("/");
 
         if (paths.length == 2 && paths[1].equals("tasks")) {
-            if (requestedMethod.equals("GET"))   return EndPoint.GET_TASKS;
-            if (requestedMethod.equals("POST"))  return EndPoint.CREATE_TASK;
-            }
-
-         else if (paths.length == 4 && paths[1].equals("tasks") && paths[2].equals("id")) {
+            if (requestedMethod.equals("GET")) return EndPoint.GET_TASKS;
+            if (requestedMethod.equals("POST")) return EndPoint.CREATE_TASK;
+        } else if (paths.length == 4 && paths[1].equals("tasks") && paths[2].equals("id")) {
             if (requestedMethod.equals("GET"))  return EndPoint.GET_TASK_BY_ID;
             if (requestedMethod.equals("POST"))  return EndPoint.UPDATE_TASK;
             if (requestedMethod.equals("DELETE"))  return EndPoint.DELETE_TASK;
         }
-
         return EndPoint.UNKNOWN;
     }
 }

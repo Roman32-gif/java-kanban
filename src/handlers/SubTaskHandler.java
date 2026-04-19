@@ -90,15 +90,13 @@ public class SubTaskHandler extends BaseHttpHandler {
         String[] paths = requestPath.split("/");
 
         if (paths.length == 2 && paths[1].equals("subtasks")) {
-            if (requestedMethod.equals("GET"))  return EndPoint.GET_SUBTASKS;
-            if (requestedMethod.equals("POST"))  return EndPoint.CREATE_SUBTASK;
-            }
-         else if (paths.length == 4 && paths[1].equals("subtasks") && paths[2].equals("id")) {
+            if (requestedMethod.equals("GET")) return EndPoint.GET_SUBTASKS;
+            if (requestedMethod.equals("POST")) return EndPoint.CREATE_SUBTASK;
+        } else if (paths.length == 4 && paths[1].equals("subtasks") && paths[2].equals("id")) {
             if (requestedMethod.equals("DELETE")) return EndPoint.DELETE_SUBTASK;
             if (requestedMethod.equals("GET"))  return EndPoint.GET_SUBTASK_BY_ID;
             if (requestedMethod.equals("POST")) return EndPoint.UPDATE_SUBTASK;
-            }
-
+        }
         return EndPoint.UNKNOWN;
     }
 }
