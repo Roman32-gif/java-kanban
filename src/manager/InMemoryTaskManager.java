@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import exceptions.OverLapException;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Task> baseTasks = new HashMap<>();
@@ -65,6 +66,21 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
+    public List<Task> getAllBaseTasks() {
+        return new ArrayList<>(baseTasks.values());
+    }
+
+    @Override
+    public List<Subtask> getAllSubTasks() {
+        return new ArrayList<>(subTasks.values());
+    }
+
+    @Override
+    public List<Epic> getAllEpics() {
+        return new ArrayList<>(epicTasks.values());
+    }
+
+    @Override
     public void deleteAllTasks() {
         List<Integer> allId = new ArrayList<>();
         allId.addAll(baseTasks.keySet());
@@ -96,7 +112,7 @@ public class InMemoryTaskManager implements TaskManager {
     public int createNewTask(Task task) {
 
         if (checkIntersections(task)) {
-            throw new FileBackedTaskManager.ManagerSaveException("Задачи пересекаются по времени: " + task.getStartTime());
+            throw new OverLapException("Задачи пересекаются по времени");
         }
 
         int base = addBaseTasks(task);
@@ -116,7 +132,7 @@ public class InMemoryTaskManager implements TaskManager {
     public int createNewSubTask(Subtask subtask) {
 
         if (checkIntersections(subtask)) {
-            throw new FileBackedTaskManager.ManagerSaveException("Задачи пересекаются по времени: " + subtask.getStartTime());
+            throw new OverLapException("Пересекаются по времени");
         }
 
         int sub = addSubTask(subtask);
@@ -130,7 +146,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateBaseTask(Task updatedTask) {
 
         if (checkIntersections(updatedTask)) {
-            throw new FileBackedTaskManager.ManagerSaveException("Задачи пересекаются по времени: " + updatedTask.getStartTime());
+            throw new OverLapException("Задачи пересекаются по времени");
         }
 
         int id = updatedTask.getId();
@@ -157,7 +173,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateSubTask(Subtask updatedSubtask) {
 
         if (checkIntersections(updatedSubtask)) {
-            throw new FileBackedTaskManager.ManagerSaveException("Задачи пересекаются по времени: " + updatedSubtask.getStartTime());
+            throw new OverLapException("Задачи пересекаются по времени");
         }
 
         int id = updatedSubtask.getId();
