@@ -1,8 +1,13 @@
 package handlers;
+import adapters.DurationAdapter;
+import adapters.LocalDateTimeAdapter;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import manager.TaskManager;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class HistoryHandler extends BaseHttpHandler {
@@ -11,7 +16,10 @@ public class HistoryHandler extends BaseHttpHandler {
 
     public HistoryHandler(TaskManager manager) {
         this.manager = manager;
-        this.gson = new Gson();
+        this.gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .registerTypeAdapter(Duration.class, new DurationAdapter())
+                .create();
     }
 
     @Override
@@ -21,12 +29,12 @@ public class HistoryHandler extends BaseHttpHandler {
         try {
             if (Objects.requireNonNull(endPoint) == EndPoint.GET_HISTORY) {
                 String response = gson.toJson(manager.getHistory());
-                sendText(exchange, response, 200);
+                sendText(exchange, response, ResponseCode.OK);
             } else {
                 sendNotFound(exchange);
             }
         } catch (Exception e) {
-            sendText(exchange, e.getMessage(), 500);
+            sendText(exchange, e.getMessage(), ResponseCode.INTERNAL_ERROR);
         }
     }
 

@@ -11,6 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import adapters.DurationAdapter;
+import adapters.LocalDateTimeAdapter;
 
 public class EpicHandler extends BaseHttpHandler {
     private final TaskManager manager;
@@ -19,68 +21,44 @@ public class EpicHandler extends BaseHttpHandler {
     public EpicHandler(TaskManager manager) {
         this.manager = manager;
         this.gson =  new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, new HttpTaskServer.LocalDateTimeAdapter())
-                .registerTypeAdapter(Duration.class, new HttpTaskServer.DurationAdapter())
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .registerTypeAdapter(Duration.class, new DurationAdapter())
                 .create();
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         EndPoint endPoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
-        String requestPath = exchange.getRequestURI().getPath();
-        String[] parts = requestPath.split("/");
-        InputStream is = exchange.getRequestBody();
-        String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
         try {
 
             switch (endPoint) {
 
                 case EndPoint.GET_EPICS:
-                    List<Epic> epics = manager.getAllEpics();
-                    String response = gson.toJson(epics);
-                    sendText(exchange, response, 200);
+                    getEpics(exchange);
                     break;
 
                 case EndPoint.CREATE_EPIC:
-                    Epic epic = gson.fromJson(body, Epic.class);
-                    manager.createNewEpic(epic);
-                    sendText(exchange, "created", 201);
+                    createEpic(exchange);
                     break;
 
                 case EndPoint.GET_EPIC_BY_ID:
-                    int id = Integer.parseInt(parts[3]);
-                    Epic epicToGetById = manager.getEpic(id);
-                    if (epicToGetById != null) {
-                        String responseToGetById = gson.toJson(epicToGetById);
-                        sendText(exchange, responseToGetById, 200);
-                    } else {
-                        sendNotFound(exchange);
-                    }
+                    getEpicById(exchange);
                     break;
 
                 case EndPoint.DELETE_EPIC:
-                    int idToDelete = Integer.parseInt(parts[3]);
-                    manager.deleteEpic(idToDelete);
-                    sendText(exchange, "deleted", 200);
+                    deleteEpic(exchange);
                     break;
 
                 case EndPoint.GET_EPIC_SUBTASKS:
-                    int idEpic = Integer.parseInt(parts[3]);
-                    if (manager.getEpic(idEpic) != null) {
-                        List<Subtask> subtasks = manager.showAllSubTasksByEpic(idEpic);
-                        String responseSubtasks = gson.toJson(subtasks);
-                        sendText(exchange, responseSubtasks, 200);
-                    } else {
-                        sendNotFound(exchange);
-                    }
+                    getEpicSubTasks(exchange);
                     break;
 
                 default:
                     sendNotFound(exchange);
             }
         } catch (Exception e) {
-            sendText(exchange, e.getMessage(), 500);
+            sendText(exchange, e.getMessage(), ResponseCode.INTERNAL_ERROR);
         }
     }
 
@@ -97,6 +75,54 @@ public class EpicHandler extends BaseHttpHandler {
             return EndPoint.GET_EPIC_SUBTASKS;
         }
         return EndPoint.UNKNOWN;
+    }
+
+    private void getEpics(HttpExchange exchange) throws IOException {
+        List<Epic> epics = manager.getAllEpics();
+        String response = gson.toJson(epics);
+        sendText(exchange, response, ResponseCode.OK);
+    }
+
+    private void createEpic(HttpExchange exchange) throws IOException {
+        InputStream is = exchange.getRequestBody();
+        String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        Epic epic = gson.fromJson(body, Epic.class);
+        manager.createNewEpic(epic);
+        sendText(exchange, "created", ResponseCode.CREATED);
+    }
+
+    private void getEpicById(HttpExchange exchange) throws IOException {
+        String requestPath = exchange.getRequestURI().getPath();
+        String[] parts = requestPath.split("/");
+        int id = Integer.parseInt(parts[3]);
+        Epic epicToGetById = manager.getEpic(id);
+        if (epicToGetById != null) {
+            String responseToGetById = gson.toJson(epicToGetById);
+            sendText(exchange, responseToGetById, ResponseCode.OK);
+        } else {
+            sendNotFound(exchange);
+        }
+    }
+
+    private void deleteEpic(HttpExchange exchange) throws IOException {
+        String requestPath = exchange.getRequestURI().getPath();
+        String[] parts = requestPath.split("/");
+        int idToDelete = Integer.parseInt(parts[3]);
+        manager.deleteEpic(idToDelete);
+        sendText(exchange, "deleted", ResponseCode.OK);
+    }
+
+    private void getEpicSubTasks(HttpExchange exchange) throws IOException {
+        String requestPath = exchange.getRequestURI().getPath();
+        String[] parts = requestPath.split("/");
+        int idEpic = Integer.parseInt(parts[3]);
+        if (manager.getEpic(idEpic) != null) {
+            List<Subtask> subtasks = manager.showAllSubTasksByEpic(idEpic);
+            String responseSubtasks = gson.toJson(subtasks);
+            sendText(exchange, responseSubtasks, ResponseCode.OK);
+        } else {
+            sendNotFound(exchange);
+        }
     }
 }
 

@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import exceptions.OverLapException;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Task> baseTasks = new HashMap<>();
@@ -112,7 +113,7 @@ public class InMemoryTaskManager implements TaskManager {
     public int createNewTask(Task task) {
 
         if (checkIntersections(task)) {
-            throw new BaseHttpHandler.OverLapException("Задачи пересекаются по времени");
+            throw new OverLapException("Задачи пересекаются по времени");
         }
 
         int base = addBaseTasks(task);
@@ -132,7 +133,7 @@ public class InMemoryTaskManager implements TaskManager {
     public int createNewSubTask(Subtask subtask) {
 
         if (checkIntersections(subtask)) {
-            throw new BaseHttpHandler.OverLapException("Пересекаются по времени");
+            throw new OverLapException("Пересекаются по времени");
         }
 
         int sub = addSubTask(subtask);
@@ -146,7 +147,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateBaseTask(Task updatedTask) {
 
         if (checkIntersections(updatedTask)) {
-            throw new BaseHttpHandler.OverLapException("Задачи пересекаются по времени");
+            throw new OverLapException("Задачи пересекаются по времени");
         }
 
         int id = updatedTask.getId();
@@ -173,7 +174,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateSubTask(Subtask updatedSubtask) {
 
         if (checkIntersections(updatedSubtask)) {
-            throw new BaseHttpHandler.OverLapException("Задачи пересекаются по времени");
+            throw new OverLapException("Задачи пересекаются по времени");
         }
 
         int id = updatedSubtask.getId();

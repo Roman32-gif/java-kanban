@@ -7,6 +7,7 @@ import models.Epic;
 import models.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.URI;
@@ -17,6 +18,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import adapters.LocalDateTimeAdapter;
+import adapters.DurationAdapter;
 
 public class HttpEpicsTest {
     TaskManager manager;
@@ -28,8 +31,8 @@ public class HttpEpicsTest {
         manager = new InMemoryTaskManager();
         taskServer = new HttpTaskServer(manager);
         gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, new HttpTaskServer.LocalDateTimeAdapter())
-                .registerTypeAdapter(Duration.class, new HttpTaskServer.DurationAdapter())
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .registerTypeAdapter(Duration.class, new DurationAdapter())
                 .create();
         taskServer.start();
     }
@@ -39,9 +42,10 @@ public class HttpEpicsTest {
         taskServer.stop();
     }
 
+    @DisplayName("Добавление валидного эпика: сервер должен вернуть статус 201")
     @Test
-    public void addEpic() throws IOException, InterruptedException {
-        Epic epic = new Epic("test1", "testing1");
+    public void addEpic_validEpic_returnStatus201() throws IOException, InterruptedException {
+        Epic epic = TestData.newEpic();
         String epicToJson = gson.toJson(epic);
         URI url = URI.create("http://localhost:8080/epics");
         HttpClient client = HttpClient.newHttpClient();
@@ -55,11 +59,12 @@ public class HttpEpicsTest {
         assertEquals(201, response.statusCode());
     }
 
+    @DisplayName("Получение всех эпиков: сервер должен вернуть статус 200")
     @Test
-    public void getEpics() throws IOException, InterruptedException {
-        Epic epic = new Epic("test1", "testing1");
+    public void getEpics_existingEpics_returnListWithStatus200() throws IOException, InterruptedException {
+        Epic epic = TestData.newEpic();
         String epic2ToJson = gson.toJson(epic);
-        Epic epic1 = new Epic("test2", "testing2");
+        Epic epic1 = TestData.newEpic();
         String epic1ToJson = gson.toJson(epic1);
         URI url = URI.create("http://localhost:8080/epics");
         HttpClient client = HttpClient.newHttpClient();
@@ -89,9 +94,10 @@ public class HttpEpicsTest {
         assertEquals(2, epicsResponse.size());
     }
 
+    @DisplayName("Удаление существующего эпика: сервер должен вернуть статус 200")
     @Test
-    public void deleteEpic() throws IOException, InterruptedException {
-        Epic epic = new Epic("test1", "test1");
+    public void deleteEpic_existingEpic_returnStatus200() throws IOException, InterruptedException {
+        Epic epic = TestData.newEpic();
         manager.createNewEpic(epic);
         int id = epic.getId();
         URI url = URI.create("http://localhost:8080/epics/id/" + id);
@@ -106,9 +112,10 @@ public class HttpEpicsTest {
         assertEquals(200, response.statusCode());
     }
 
+    @DisplayName("Получение истории просмотра: сервер должен вернуть статус 200")
     @Test
-    public void getHistory() throws IOException, InterruptedException {
-        Epic epic = new Epic("test1", "testing1");
+    public void getHistory_existingHistory_returnListWithStatus200() throws IOException, InterruptedException {
+        Epic epic = TestData.newEpic();
         manager.createNewEpic(epic);
         int id = epic.getId();
         URI url = URI.create("http://localhost:8080/epics/id/" + id);
@@ -128,7 +135,7 @@ public class HttpEpicsTest {
                 .build();
 
         HttpResponse<String> response1 = client.send(request1, HttpResponse.BodyHandlers.ofString());
-        assertEquals(200, response.statusCode());
+        assertEquals(200, response1.statusCode());
         List<Task> epicList = manager.getHistory();
         assertEquals(1, epicList.size());
     }

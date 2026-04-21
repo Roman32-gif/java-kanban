@@ -10,6 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import exceptions.OverLapException;
+import adapters.LocalDateTimeAdapter;
+import adapters.DurationAdapter;
 
 public class SubTaskHandler extends BaseHttpHandler {
     private final TaskManager manager;
@@ -18,72 +21,44 @@ public class SubTaskHandler extends BaseHttpHandler {
     public SubTaskHandler(TaskManager manager) {
         this.manager = manager;
         this.gson =  new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, new HttpTaskServer.LocalDateTimeAdapter())
-                .registerTypeAdapter(Duration.class, new HttpTaskServer.DurationAdapter())
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .registerTypeAdapter(Duration.class, new DurationAdapter())
                 .create();
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         EndPoint endPoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
-        String requestPath = exchange.getRequestURI().getPath();
-        String[] parts = requestPath.split("/");
-        InputStream is = exchange.getRequestBody();
-        String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
         try {
 
             switch (endPoint) {
 
                 case EndPoint.GET_SUBTASKS:
-                    List<Subtask> subtasks = manager.getAllSubTasks();
-                    String response = gson.toJson(subtasks);
-                    sendText(exchange, response, 200);
+                    getSubTasks(exchange);
                     break;
 
                 case EndPoint.CREATE_SUBTASK:
-                    Subtask subtask = gson.fromJson(body, Subtask.class);
-                    try {
-                        manager.createNewSubTask(subtask);
-                        sendText(exchange, "created", 201);
-                    } catch (BaseHttpHandler.OverLapException o) {
-                        sendHasInteractions(exchange);
-                    }
+                    createSubTasks(exchange);
                     break;
 
                 case EndPoint.DELETE_SUBTASK:
-                    int idToDelete = Integer.parseInt(parts[3]);
-                    manager.deleteSubTask(idToDelete);
-                    sendText(exchange, "deleted", 200);
+                    deleteSubTask(exchange);
                     break;
 
                 case EndPoint.GET_SUBTASK_BY_ID:
-                    int idToGetById = Integer.parseInt(parts[3]);
-                    Subtask subtaskToGetById = manager.getSubTask(idToGetById);
-                    if (subtaskToGetById != null) {
-                        String responseToGetById = gson.toJson(subtaskToGetById);
-                        sendText(exchange, responseToGetById, 200);
-                    } else {
-                        sendNotFound(exchange);
-                    }
+                    getSubTaskById(exchange);
                     break;
 
                 case EndPoint.UPDATE_SUBTASK:
-                    Subtask subtaskUpdate = gson.fromJson(body, Subtask.class);
-
-                    try {
-                        manager.updateSubTask(subtaskUpdate);
-                        sendText(exchange, "updated", 201);
-                    } catch (BaseHttpHandler.OverLapException o) {
-                        sendHasInteractions(exchange);
-                    }
+                    updateSubTask(exchange);
                     break;
 
                 default:
                     sendNotFound(exchange);
             }
         } catch (Exception e) {
-            sendText(exchange, e.getMessage(), 500);
+            sendText(exchange, e.getMessage(), ResponseCode.INTERNAL_ERROR);
         }
     }
 
@@ -99,5 +74,57 @@ public class SubTaskHandler extends BaseHttpHandler {
             if (requestedMethod.equals("POST")) return EndPoint.UPDATE_SUBTASK;
         }
         return EndPoint.UNKNOWN;
+    }
+
+    private void getSubTasks(HttpExchange exchange) throws IOException {
+        List<Subtask> subtasks = manager.getAllSubTasks();
+        String response = gson.toJson(subtasks);
+        sendText(exchange, response, ResponseCode.OK);
+    }
+
+    private void createSubTasks(HttpExchange exchange) throws IOException {
+        InputStream is = exchange.getRequestBody();
+        String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        Subtask subtask = gson.fromJson(body, Subtask.class);
+        try {
+            manager.createNewSubTask(subtask);
+            sendText(exchange, "created", ResponseCode.CREATED);
+        } catch (OverLapException o) {
+            sendHasInteractions(exchange);
+        }
+    }
+
+    private void deleteSubTask(HttpExchange exchange) throws IOException {
+        String requestPath = exchange.getRequestURI().getPath();
+        String[] parts = requestPath.split("/");
+        int idToDelete = Integer.parseInt(parts[3]);
+        manager.deleteSubTask(idToDelete);
+        sendText(exchange, "deleted", ResponseCode.OK);
+    }
+
+    private void getSubTaskById(HttpExchange exchange) throws IOException {
+        String requestPath = exchange.getRequestURI().getPath();
+        String[] parts = requestPath.split("/");
+        int idToGetById = Integer.parseInt(parts[3]);
+        Subtask subtaskToGetById = manager.getSubTask(idToGetById);
+        if (subtaskToGetById != null) {
+            String responseToGetById = gson.toJson(subtaskToGetById);
+            sendText(exchange, responseToGetById, ResponseCode.OK);
+        } else {
+            sendNotFound(exchange);
+        }
+    }
+
+    private void updateSubTask(HttpExchange exchange) throws IOException {
+        InputStream is = exchange.getRequestBody();
+        String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        Subtask subtaskUpdate = gson.fromJson(body, Subtask.class);
+
+        try {
+            manager.updateSubTask(subtaskUpdate);
+            sendText(exchange, "updated", ResponseCode.CREATED);
+        } catch (OverLapException o) {
+            sendHasInteractions(exchange);
+        }
     }
 }

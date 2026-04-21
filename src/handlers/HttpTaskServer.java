@@ -1,14 +1,8 @@
 package handlers;
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import manager.Managers;
 import manager.TaskManager;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import com.sun.net.httpserver.HttpServer;
 
 public class HttpTaskServer {
@@ -38,31 +32,5 @@ public class HttpTaskServer {
 
     public static void main(String[] args) throws IOException {
         new HttpTaskServer(Managers.getDefault()).start();
-    }
-
-    public static class DurationAdapter extends TypeAdapter<Duration> {
-        @Override
-        public void write(JsonWriter out, Duration value) throws IOException {
-            out.value(value != null ? value.toMinutes() : null);
-        }
-
-        @Override
-        public Duration read(JsonReader in) throws IOException {
-            return Duration.ofMinutes(Long.parseLong(in.nextString()));
-        }
-    }
-
-    public static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
-        private static final DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-
-        @Override
-        public void write(JsonWriter out, LocalDateTime value) throws IOException {
-            out.value(value != null ? value.format(dtf) : null);
-        }
-
-        @Override
-        public LocalDateTime read(JsonReader in) throws IOException {
-            return LocalDateTime.parse(in.nextString(), dtf);
-        }
     }
 }
